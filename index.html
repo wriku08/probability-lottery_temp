@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>確率を変えられるくじ引き！！</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .container {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .result {
+            display: none;
+            font-size: 24px;
+            margin-top: 20px;
+            animation: fadeIn 1s;
+        }
+
+        .count {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .history {
+            margin-top: 20px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .frequency {
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin-top: 30px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+
+            .result {
+                font-size: 20px;
+                margin-top: 15px;
+            }
+
+            .count {
+                font-size: 16px;
+                margin-top: 8px;
+            }
+
+            .history {
+                font-size: 12px;
+                margin-top: 15px;
+            }
+
+            .frequency {
+                font-size: 12px;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>確率を変えられるくじ引き！！</h1>
+        <p>くじを引いてみよう！</p>
+        <button onclick="drawLottery()">くじを引く</button>
+        <div id="count" class="count"></div>
+        <div id="result" class="result"></div>
+        <div id="history" class="history"></div>
+        <div id="frequency" class="frequency"></div>
+    </div>
+
+    <script>
+        // 確率を調整するくじのデータ
+        const lotteryData = [
+            //probability で確率を操作してください。 TODO
+            { name: '特定の引数', probability: 0.0001 },
+            { name: '特定の引数', probability: 0.071421428571429 },
+            { name: '特定の引数', probability: 0.071421428571429 },
+            { name: '特定の引数', probability: 0.071421428571429 },
+            { name: '特定の引数', probability: 0.071421428571429 },
+            { name: '特定の引数', probability: 0.071421428571429 },
+            { name: '特定の引数', probability: 0.071421428571429 },
+            { name: '特定の引数', probability: 0.071421428571429 },
+            { name: '特定の引数', probability: 0.071421428571429 },
+            { name: '特定の引数', probability: 0.071421428571429 },
+            { name: '特定の引数', probability: 0.071421428571429 },
+            { name: '特定の引数', probability: 0.071421428571429 },
+            { name: '特定の引数', probability: 0.071421428571429 },
+            { name: '特定の引数', probability: 0.071421428571429 },
+            { name: '特定の引数', probability: 0.071421428571429 }
+        ];
+
+        let count = 0;
+        const history = [];
+        const frequency = {};
+
+        // 初期化処理
+        function initialize() {
+            const frequencyElement = document.getElementById('frequency');
+            frequencyElement.innerHTML = '';
+
+            for (const item of lotteryData) {
+                frequency[item.name] = 0;
+                const frequencyItem = document.createElement('div');
+                frequencyItem.dataset.name = item.name;
+                frequencyItem.innerText = `${item.name}: 0回`;
+                frequencyElement.appendChild(frequencyItem);
+            }
+        }
+
+        initialize();
+
+        // くじを引く関数
+        function drawLottery() {
+            // 0から1までの乱数を生成
+            const random = Math.random();
+
+            let cumulativeProbability = 0;
+
+            // 確率に基づいてくじを引く
+            for (const item of lotteryData) {
+                cumulativeProbability += item.probability;
+                if (random < cumulativeProbability) {
+                    const resultElement = document.getElementById('result');
+                    resultElement.innerText = `当選：${item.name}`;
+
+                    // カウントを増やす
+                    count++;
+                    const countElement = document.getElementById('count');
+                    countElement.innerText = `くじを引いた回数：${count}回`;
+
+                    // カラフルなスタイルを設定
+                    const randomColor = getRandomColor();
+                    resultElement.style.color = randomColor;
+
+                    // 表示アニメーションのためにスタイルを設定
+                    resultElement.style.display = 'block';
+
+                    // // 履歴に追加 これを行うと下に履歴が表示されます。 TODO
+                    // history.push(item.name);
+                    // updateHistory();
+
+                    // 頻度を更新
+                    frequency[item.name]++;
+                    updateFrequency();
+
+                    if (item.name === '特定の引数で止めることができます。') { // TODO
+                        document.querySelector('button').setAttribute('disabled', 'true');
+                    }
+
+                    //この10を変えると履歴が指定の数で削除されます。 TODO
+                    if (count % 10 === 0) {
+                        clearHistory();
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        // ランダムなカラーを生成する関数
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // 履歴を順番に消去する関数
+        function clearHistory() {
+            const historyElement = document.getElementById('history');
+            historyElement.innerHTML = '';
+            history.length = 0;
+        }
+
+        // 履歴を更新する関数
+        function updateHistory() {
+            const historyElement = document.getElementById('history');
+            historyElement.innerHTML = '';
+            for (let i = history.length - 1; i >= 0; i--) {
+                const item = history[i];
+                const historyItem = document.createElement('div');
+                historyItem.innerText = `- ${item}`;
+                historyElement.appendChild(historyItem);
+            }
+        }
+
+        // 頻度を更新する関数
+        function updateFrequency() {
+            const frequencyElement = document.getElementById('frequency');
+
+            for (const item of lotteryData) {
+                const frequencyItem = frequencyElement.querySelector(`[data-name="${item.name}"]`);
+                frequencyItem.innerText = `${item.name}: ${frequency[item.name]}回`;
+            }
+        }
+    </script>
+</body>
+
+</html>
